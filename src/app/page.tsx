@@ -1,101 +1,164 @@
-import Image from "next/image";
+// src/app/page.tsx
+"use client";
 
-export default function Home() {
+import React, { useEffect, useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Select,
+  MenuItem,
+  Button,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+
+type RowData = { [key: string]: string };
+
+const Page = () => {
+  const [data, setData] = useState<RowData[]>([]);
+  const [filteredData, setFilteredData] = useState<RowData[]>([]);
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [years, setYears] = useState<string[]>([]);
+  const [players, setPlayers] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedPlayer, setSelectedPlayer] = useState<string>('');
+  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/googleSheets');
+      const sheetData = await response.json();
+      if (sheetData.length > 0) {
+        setHeaders(Object.keys(sheetData[0]));
+        setData(sheetData);
+        const uniqueYears = [...new Set(sheetData.map((row: RowData): string => row.Year as string))] as string[];
+        uniqueYears.sort((a, b) => parseInt(b) - parseInt(a)); // Sort years in descending order
+        setYears(uniqueYears);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedYear) {
+      const filteredPlayers = data
+        .filter((row) => row.Year === selectedYear)
+        .map((row) => row.Player);
+      setPlayers([...new Set(filteredPlayers)]);
+    } else {
+      setPlayers([]);
+    }
+  }, [selectedYear, data]);
+
+  const handleApplyFilters = () => {
+    let filtered = data;
+    if (selectedYear) {
+      filtered = filtered.filter((row) => row.Year === selectedYear);
+    }
+    if (selectedPlayer) {
+      filtered = filtered.filter((row) => row.Player === selectedPlayer);
+    }
+    setFilteredData(filtered);
+    setFiltersApplied(true);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
+        <InputLabel>Year</InputLabel>
+        <Select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value as string)}
+          label="Year"
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {years.map((year) => (
+            <MenuItem key={year} value={year}>
+              {year}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
+        <InputLabel>Player</InputLabel>
+        <Select
+          value={selectedPlayer}
+          onChange={(e) => setSelectedPlayer(e.target.value as string)}
+          label="Player"
+          disabled={!selectedYear}
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {players.map((player) => (
+            <MenuItem key={player} value={player}>
+              {player}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <Button variant="contained" color="primary" onClick={handleApplyFilters} disabled={!selectedYear || !selectedPlayer}>
+        Apply
+      </Button>
+      {filtersApplied && filteredData.length > 0 && (
+        <>
+          <TableContainer component={Paper} style={{ marginTop: 20 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Year and Player</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell align="center">{`${filteredData[0].Year} - ${filteredData[0].Player}`}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TableContainer component={Paper} style={{ marginTop: 20 }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const similarRow = filteredData.find(row => row.Similarity_Rank === `${i + 1}`);
+                    return (
+                      <TableCell key={i} align="center">
+                        {similarRow
+                          ? `Similarity Rank ${i + 1} - ${(parseFloat(similarRow.Similarity_Score) * 100).toFixed(2)}%`
+                          : `Similarity Rank ${i + 1}`}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const similarRow = filteredData.find(row => row.Similarity_Rank === `${i + 1}`);
+                    return (
+                      <TableCell key={i} align="center">
+                        {similarRow
+                          ? `${similarRow.Similar_Year} - ${similarRow.Similar_Player}`
+                          : 'N/A'}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
+    </>
   );
-}
+};
+
+export default Page;
