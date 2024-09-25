@@ -45,7 +45,7 @@ const Filters: React.FC<FiltersProps> = ({ data, onFilter }) => {
 
   return (
     <>
-      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
+      <FormControl variant="outlined" style={{ minWidth: 120, minHeight: 50, marginRight: 10 }}>
         <InputLabel>Year</InputLabel>
         <Select
           value={selectedYear}
@@ -62,7 +62,7 @@ const Filters: React.FC<FiltersProps> = ({ data, onFilter }) => {
           ))}
         </Select>
       </FormControl>
-      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
+      <FormControl variant="outlined" style={{ minWidth: 200, minHeight: 50, marginRight: 10 }}>
         <InputLabel>Player</InputLabel>
         <Select
           value={selectedPlayer}
@@ -80,7 +80,7 @@ const Filters: React.FC<FiltersProps> = ({ data, onFilter }) => {
           ))}
         </Select>
       </FormControl>
-      <Button variant="contained" color="primary" onClick={handleApplyFilters} disabled={!selectedYear || !selectedPlayer}>
+      <Button variant="contained" color="primary" style={{ minHeight: 50, marginRight: 10, marginTop: 2 }} onClick={handleApplyFilters} disabled={!selectedYear || !selectedPlayer}>
         Apply
       </Button>
     </>

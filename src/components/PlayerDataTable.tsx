@@ -1,16 +1,9 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Paper,
-  Typography,
-  Box
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Typography, Box } from '@mui/material';
+import { getColorScale } from '../utils/colorScale';
 
 type RowData = { [key: string]: string };
+
 interface PlayerDataTableProps {
   data: RowData[];
   selectedPlayer: string;
@@ -58,6 +51,14 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
   moveTotalRoutesToEnd(routeHeaders);
   moveTotalRoutesToEnd(successRateHeaders);
 
+  const numericalHeaders = headers.filter(header => !isNaN(parseFloat(filteredData[0][header])));
+
+  const minMaxValues = numericalHeaders.reduce((acc, header) => {
+    const values = filteredData.map(row => parseFloat(row[header]));
+    acc[header] = { min: Math.min(...values), max: Math.max(...values) };
+    return acc;
+  }, {} as { [key: string]: { min: number, max: number } });
+
   return (
     <TableContainer component={Paper} sx={{ height: '100%', textAlign: 'center' }}>
       <Table sx={{ width: 300, maxHeight: 500 }} aria-label="player data table">
@@ -94,12 +95,12 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
                   {routeHeader.replace('Route %', '')}
                 </Typography>
               </TableCell>
-              <TableCell align="center" sx={{ padding: '8px' }}>
+              <TableCell align="center" sx={{ padding: '8px', backgroundColor: getColorScale(parseFloat(filteredData[0][routeHeader]), minMaxValues[routeHeader].min, minMaxValues[routeHeader].max) }}>
                 <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                   {routeHeader === 'Route % Total Routes' ? filteredData[0][routeHeader] : `${(parseFloat(filteredData[0][routeHeader]) * 100).toFixed(2)}%`}
                 </Typography>
               </TableCell>
-              <TableCell align="center" sx={{ padding: '8px' }}>
+              <TableCell align="center" sx={{ padding: '8px', backgroundColor: getColorScale(parseFloat(filteredData[0][successRateHeaders[routeIndex]]), minMaxValues[successRateHeaders[routeIndex]].min, minMaxValues[successRateHeaders[routeIndex]].max) }}>
                 <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                   {successRateHeaders[routeIndex] === 'Success Rate by Route Total Routes' ? filteredData[0][successRateHeaders[routeIndex]] : `${(parseFloat(filteredData[0][successRateHeaders[routeIndex]]) * 100).toFixed(2)}%`}
                 </Typography>
