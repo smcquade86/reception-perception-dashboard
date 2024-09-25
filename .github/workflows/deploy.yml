@@ -11,12 +11,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Update to v3
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Update to v3
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Update to Node.js 16
+          node-version: '16'
+
+      - name: Print Node.js version
+        run: node -v
 
       - name: Install dependencies
         run: npm install
@@ -25,6 +28,9 @@ jobs:
         run: |
           export NODE_ENV=production
           npm run build
+
+      - name: List build output
+        run: ls -la .next
 
       - name: Deploy to GitHub Pages
         run: |
