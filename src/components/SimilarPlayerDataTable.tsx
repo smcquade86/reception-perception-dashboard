@@ -84,13 +84,31 @@ const SimilarPlayerDataTable: React.FC<SimilarPlayerDataTableProps> = ({ data, s
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ padding: '2px' }}>
-                        <Typography variant="body2" sx={{ fontSize: '0.875rem', display: 'inline-block', border: `3px solid ${routeColor}`, paddingLeft: '5px', paddingRight: '5px' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '0.875rem',
+                            display: 'inline-block',
+                            border: `3px solid ${routeColor}`,
+                            paddingLeft: '5px',
+                            paddingRight: '5px',
+                          }}
+                        >
                           {routeHeader === 'Route % Total Routes' ? filteredData[0][routeHeader] : `${(parseFloat(filteredData[0][routeHeader]) * 100).toFixed(2)}%`}
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ padding: '2px' }}>
-                        <Typography variant="body2" sx={{ fontSize: '0.875rem', border: `3px solid ${successRateColor}`, display: 'inline-block', paddingLeft: '5px', paddingRight: '5px' }}>
-                          {successRateHeaders[routeIndex] === 'Success Rate by Route Total Routes' ? filteredData[0][successRateHeaders[routeIndex]] : `${(parseFloat(filteredData[0][successRateHeaders[routeIndex]]) * 100).toFixed(2)}%`}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '0.875rem',
+                            border: routeHeader === 'Route % Total Routes' ? 'none' : `3px solid ${successRateColor}`,
+                            display: 'inline-block',
+                            paddingLeft: '5px',
+                            paddingRight: '5px',
+                          }}
+                        >
+                          {routeHeader === 'Route % Total Routes' ? '' : `${(parseFloat(filteredData[0][successRateHeaders[routeIndex]]) * 100).toFixed(2)}%`}
                         </Typography>
                       </TableCell>
                     </TableRow>

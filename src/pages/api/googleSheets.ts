@@ -1,20 +1,30 @@
 import { google } from 'googleapis';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 type RowData = { [key: string]: string };
 
-async function fetchGoogleSheetData() {
+async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlayers: RowData[] }> {
+  const auth = new google.auth.GoogleAuth({
+    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Use the environment variable
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  });
+
+  const sheets = google.sheets({ version: 'v4', auth });
+
   try {
-    const auth = new google.auth.GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+    const spreadsheet = await sheets.spreadsheets.get({
+      spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
     });
 
-    const sheets = google.sheets({ version: 'v4', auth });
+    console.log('Available sheets:', spreadsheet.data.sheets?.map(sheet => sheet.properties?.title));
 
     // Fetch data from the player_data sheet
     const playersResponse = await sheets.spreadsheets.values.get({
       spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
-      range: 'player_data!A:Z',
+      range: 'player_data!A:BL',
     });
 
     const playersRows = playersResponse.data.values;
@@ -29,7 +39,7 @@ async function fetchGoogleSheetData() {
     // Fetch data from the player_data_colors sheet
     const colorsResponse = await sheets.spreadsheets.values.get({
       spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
-      range: 'player_data_colors!A:Z',
+      range: 'player_data_colors!A:BL',
     });
 
     const colorsRows = colorsResponse.data.values;
@@ -72,9 +82,9 @@ async function fetchGoogleSheetData() {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const data = await fetchGoogleSheetData();
+    console.log('API Response:', data); // Log the response
     res.status(200).json(data);
   } catch (error) {
-    console.error('Error in API handler:', error);
     res.status(500).json({ error: 'Failed to fetch Google Sheets data' });
   }
 }
