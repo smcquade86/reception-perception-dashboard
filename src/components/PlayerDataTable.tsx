@@ -1,6 +1,5 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Typography, Box } from '@mui/material';
-import { getColorScale } from '../utils/colorScale';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Typography, Box, useTheme } from '@mui/material';
 
 type RowData = { [key: string]: string };
 
@@ -11,7 +10,8 @@ interface PlayerDataTableProps {
 }
 
 const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer, selectedYear }) => {
-  // Ensure selectedPlayer and selectedYear are defined
+  const theme = useTheme();
+
   if (!selectedPlayer || !selectedYear) {
     return (
       <Box sx={{ textAlign: 'center', height: '100%' }}>
@@ -22,7 +22,6 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
     );
   }
 
-  // Filter data based on selectedYear and selectedPlayer
   const filteredData = data.filter(row => row.Year === selectedYear && row.Player === selectedPlayer);
 
   if (filteredData.length === 0) {
@@ -39,7 +38,6 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
   let routeHeaders = headers.filter(header => header.startsWith('Route %') && !header.includes('Rank'));
   let successRateHeaders = headers.filter(header => header.startsWith('Success Rate') && !header.includes('Rank'));
 
-  // Move 'Total Routes' to the end
   const moveTotalRoutesToEnd = (headers: string[]) => {
     const totalRoutesIndex = headers.findIndex(header => header.includes('Total Routes'));
     if (totalRoutesIndex > -1) {
@@ -50,14 +48,6 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
 
   moveTotalRoutesToEnd(routeHeaders);
   moveTotalRoutesToEnd(successRateHeaders);
-
-  const numericalHeaders = headers.filter(header => !isNaN(parseFloat(filteredData[0][header])));
-
-  const minMaxValues = numericalHeaders.reduce((acc, header) => {
-    const values = filteredData.map(row => parseFloat(row[header]));
-    acc[header] = { min: Math.min(...values), max: Math.max(...values) };
-    return acc;
-  }, {} as { [key: string]: { min: number, max: number } });
 
   return (
     <TableContainer component={Paper} sx={{ height: '100%', textAlign: 'center' }}>
@@ -88,25 +78,30 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
               <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>Success Rate</Typography>
             </TableCell>
           </TableRow>
-          {routeHeaders.map((routeHeader, routeIndex) => (
-            <TableRow key={routeHeader}>
-              <TableCell align="center" sx={{ padding: '8px' }}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                  {routeHeader.replace('Route %', '')}
-                </Typography>
-              </TableCell>
-              <TableCell align="center" sx={{ padding: '8px', backgroundColor: getColorScale(parseFloat(filteredData[0][routeHeader]), minMaxValues[routeHeader].min, minMaxValues[routeHeader].max) }}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                  {routeHeader === 'Route % Total Routes' ? filteredData[0][routeHeader] : `${(parseFloat(filteredData[0][routeHeader]) * 100).toFixed(2)}%`}
-                </Typography>
-              </TableCell>
-              <TableCell align="center" sx={{ padding: '8px', backgroundColor: getColorScale(parseFloat(filteredData[0][successRateHeaders[routeIndex]]), minMaxValues[successRateHeaders[routeIndex]].min, minMaxValues[successRateHeaders[routeIndex]].max) }}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
-                  {successRateHeaders[routeIndex] === 'Success Rate by Route Total Routes' ? filteredData[0][successRateHeaders[routeIndex]] : `${(parseFloat(filteredData[0][successRateHeaders[routeIndex]]) * 100).toFixed(2)}%`}
-                </Typography>
-              </TableCell>
-            </TableRow>
-          ))}
+          {routeHeaders.map((routeHeader, routeIndex) => {
+            const routeColor = filteredData[0][`color_${routeHeader}`];
+            const successRateColor = filteredData[0][`color_${successRateHeaders[routeIndex]}`];
+
+            return (
+              <TableRow key={routeHeader}>
+                <TableCell align="center" sx={{ padding: '8px' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                    {routeHeader.replace('Route %', '')}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center" sx={{ padding: '2px' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.875rem', display: 'inline-block', border: `3px solid ${routeColor}`, paddingLeft: '5px', paddingRight: '5px' }}>
+                    {routeHeader === 'Route % Total Routes' ? filteredData[0][routeHeader] : `${(parseFloat(filteredData[0][routeHeader]) * 100).toFixed(2)}%`}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center" sx={{ padding: '2px' }}>
+                  <Typography variant="body2" sx={{ fontSize: '0.875rem', border: `3px solid ${successRateColor}`, display: 'inline-block', paddingLeft: '5px', paddingRight: '5px' }}>
+                    {successRateHeaders[routeIndex] === 'Success Rate by Route Total Routes' ? filteredData[0][successRateHeaders[routeIndex]] : `${(parseFloat(filteredData[0][successRateHeaders[routeIndex]]) * 100).toFixed(2)}%`}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>

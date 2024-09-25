@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 type RowData = { [key: string]: string };
 
-async function fetchGoogleSheetData() {
+async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlayers: RowData[] }> {
   const auth = new google.auth.GoogleAuth({
     keyFile: 'src/config/credentials.json',
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
@@ -28,12 +28,31 @@ async function fetchGoogleSheetData() {
     const playersData: RowData[] = playersRows && playersRows.length > 0 ? playersRows.slice(1).map(row => {
       const rowData: RowData = {};
       playersRows[0].forEach((header, index) => {
-        if (header === 'Year' || header === 'Player' || header.startsWith('Route %') || header.startsWith('Success Rate by Route')) {
-          rowData[header] = row[index];
-        }
+        rowData[header] = row[index];
       });
       return rowData;
     }) : [];
+
+    // Fetch data from the player_data_colors sheet
+    const colorsResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
+      range: 'player_data_colors!A:BL',
+    });
+
+    const colorsRows = colorsResponse.data.values;
+    const colorsData: RowData[] = colorsRows && colorsRows.length > 0 ? colorsRows.slice(1).map(row => {
+      const rowData: RowData = {};
+      colorsRows[0].forEach((header, index) => {
+        rowData[`color_${header}`] = row[index];
+      });
+      return rowData;
+    }) : [];
+
+    // Join player_data with player_data_colors
+    const joinedData = playersData.map(playerRow => {
+      const colorRow = colorsData.find(colorRow => colorRow['color_Year'] === playerRow['Year'] && colorRow['color_Player'] === playerRow['Player']);
+      return { ...playerRow, ...colorRow };
+    });
 
     // Fetch data from the similar_players sheet
     const similarPlayersResponse = await sheets.spreadsheets.values.get({
@@ -50,7 +69,7 @@ async function fetchGoogleSheetData() {
       return rowData;
     }) : [];
 
-    return { players: playersData, similarPlayers: similarPlayersData };
+    return { players: joinedData, similarPlayers: similarPlayersData };
   } catch (error) {
     console.error('Error fetching Google Sheets data:', error);
     throw new Error('Failed to fetch Google Sheets data');

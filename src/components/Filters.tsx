@@ -62,7 +62,7 @@ const Filters: React.FC<FiltersProps> = ({ data, onFilter }) => {
           ))}
         </Select>
       </FormControl>
-      <FormControl variant="outlined" style={{ minWidth: 200, minHeight: 50, marginRight: 10 }}>
+      <FormControl variant="outlined" style={{ minWidth: 200, minHeight: 50, marginRight: 10, marginBottom:10 }}>
         <InputLabel>Player</InputLabel>
         <Select
           value={selectedPlayer}
