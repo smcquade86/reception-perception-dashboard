@@ -1,163 +1,58 @@
-// src/app/page.tsx
-"use client";
+'use client';
 
-import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Select,
-  MenuItem,
-  Button,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box } from '@mui/material';
+import PlayerDataTable from '../components/PlayerDataTable';
+import SimilarPlayerDataTable from '../components/SimilarPlayerDataTable';
+import Filters from '../components/Filters';
+import CustomScrollbarBox from '../components/CustomScrollbarBox'; // Import the custom scrollbar component
 
 type RowData = { [key: string]: string };
 
 const Page = () => {
-  const [data, setData] = useState<RowData[]>([]);
+  const [data, setData] = useState<{ players: RowData[], similarPlayers: RowData[] }>({ players: [], similarPlayers: [] });
   const [filteredData, setFilteredData] = useState<RowData[]>([]);
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [years, setYears] = useState<string[]>([]);
-  const [players, setPlayers] = useState<string[]>([]);
+  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
-  const [filtersApplied, setFiltersApplied] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch('/api/googleSheets');
       const sheetData = await response.json();
-      if (sheetData.length > 0) {
-        setHeaders(Object.keys(sheetData[0]));
+      if (sheetData.players.length > 0 || sheetData.similarPlayers.length > 0) {
         setData(sheetData);
-        const uniqueYears = [...new Set(sheetData.map((row: RowData): string => row.Year as string))] as string[];
-        uniqueYears.sort((a, b) => parseInt(b) - parseInt(a)); // Sort years in descending order
-        setYears(uniqueYears);
       }
     };
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (selectedYear) {
-      const filteredPlayers = data
-        .filter((row) => row.Year === selectedYear)
-        .map((row) => row.Player);
-      setPlayers([...new Set(filteredPlayers)]);
-    } else {
-      setPlayers([]);
-    }
-  }, [selectedYear, data]);
-
-  const handleApplyFilters = () => {
-    let filtered = data;
-    if (selectedYear) {
-      filtered = filtered.filter((row) => row.Year === selectedYear);
-    }
-    if (selectedPlayer) {
-      filtered = filtered.filter((row) => row.Player === selectedPlayer);
-    }
+  const handleFilter = (filtered: RowData[], year: string, player: string) => {
     setFilteredData(filtered);
+    setSelectedYear(year);
+    setSelectedPlayer(player);
     setFiltersApplied(true);
   };
 
   return (
-    <>
-      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
-        <InputLabel>Year</InputLabel>
-        <Select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(e.target.value as string)}
-          label="Year"
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {years.map((year) => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl variant="outlined" style={{ minWidth: 120, marginRight: 10 }}>
-        <InputLabel>Player</InputLabel>
-        <Select
-          value={selectedPlayer}
-          onChange={(e) => setSelectedPlayer(e.target.value as string)}
-          label="Player"
-          disabled={!selectedYear}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {players.map((player) => (
-            <MenuItem key={player} value={player}>
-              {player}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button variant="contained" color="primary" onClick={handleApplyFilters} disabled={!selectedYear || !selectedPlayer}>
-        Apply
-      </Button>
+    <CustomScrollbarBox sx={{ paddingTop: '16px', paddingX: '16px' }}>
+      <Filters data={data.players} onFilter={handleFilter} />
       {filtersApplied && filteredData.length > 0 && (
-        <>
-          <TableContainer component={Paper} style={{ marginTop: 20 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">Year and Player</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell align="center">{`${filteredData[0].Year} - ${filteredData[0].Player}`}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TableContainer component={Paper} style={{ marginTop: 20 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {Array.from({ length: 5 }).map((_, i) => {
-                    const similarRow = filteredData.find(row => row.Similarity_Rank === `${i + 1}`);
-                    return (
-                      <TableCell key={i} align="center">
-                        {similarRow
-                          ? `Similarity Rank ${i + 1} - ${(parseFloat(similarRow.Similarity_Score) * 100).toFixed(2)}%`
-                          : `Similarity Rank ${i + 1}`}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  {Array.from({ length: 5 }).map((_, i) => {
-                    const similarRow = filteredData.find(row => row.Similarity_Rank === `${i + 1}`);
-                    return (
-                      <TableCell key={i} align="center">
-                        {similarRow
-                          ? `${similarRow.Similar_Year} - ${similarRow.Similar_Player}`
-                          : 'N/A'}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
+        <Box sx={{ width: '100%', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+          <Box sx={{ flex: '0 0 auto', minWidth: '300px', maxWidth: '500px', textAlign: 'center' }}>
+            <PlayerDataTable data={data.players} selectedYear={selectedYear} selectedPlayer={selectedPlayer} />
+          </Box>
+          <Box sx={{ flexGrow: 1, overflowX: 'auto' }}>
+            <SimilarPlayerDataTable
+              data={data.players}
+              similarPlayers={data.similarPlayers.filter(
+                (row) => row.Player === selectedPlayer && row.Year === selectedYear
+              )}
+            />
+          </Box>
+        </Box>
       )}
-    </>
+    </CustomScrollbarBox>
   );
 };
 
