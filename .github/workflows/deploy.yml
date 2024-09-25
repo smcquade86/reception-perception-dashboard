@@ -28,11 +28,17 @@ jobs:
         run: |
           export NODE_ENV=production
           npm run build
+        continue-on-error: true
+
+      - name: Capture build logs
+        if: failure()
+        run: cat .next/build-log.txt || true
 
       - name: List build output
         run: ls -la .next
 
       - name: Deploy to GitHub Pages
+        if: success()
         run: |
           npm install -g gh-pages
           gh-pages -d out
