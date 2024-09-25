@@ -1,6 +1,6 @@
 {
   "name": "reception-perception-dashboard",
-  "homepage": "https://<username>.github.io/<repository-name>",
+  "homepage": "https://smcquade86.github.io/reception-perception-dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -25,7 +25,8 @@
     "graphql": "^16.9.0",
     "next": "14.2.13",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -36,7 +37,6 @@
     "eslint-config-next": "14.2.13",
     "postcss": "^8",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
 }
