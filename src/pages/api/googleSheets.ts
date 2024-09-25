@@ -87,6 +87,14 @@ async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlay
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const referer = req.headers.referer;
+  const isLocal = process.env.NODE_ENV === 'development';
+
+  // Check if the request is coming from the allowed domain or if it's a local development environment
+  if (!isLocal && (!referer || !referer.startsWith('https://receptionperception.com/'))) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
     const data = await fetchGoogleSheetData();
     res.status(200).json(data);
