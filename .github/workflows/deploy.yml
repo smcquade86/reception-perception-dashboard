@@ -27,12 +27,12 @@ jobs:
       - name: Build project
         run: |
           export NODE_ENV=production
-          npm run build
+          npm run build 2>&1 | tee build-log.txt
         continue-on-error: true
 
       - name: Capture build logs
         if: failure()
-        run: cat .next/build-log.txt || true
+        run: cat build-log.txt
 
       - name: List build output
         run: ls -la .next
