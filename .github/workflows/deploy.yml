@@ -25,7 +25,6 @@ jobs:
         run: |
           export NODE_ENV=production
           npm run build
-          npm run export
 
       - name: Deploy to GitHub Pages
         run: |
