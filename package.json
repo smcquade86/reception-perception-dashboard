@@ -9,7 +9,8 @@
     "start": "npx next start",
     "lint": "npx next lint",
     "clean": "rm -rf node_modules .next dist",
-    "deploy": "gh-pages -d out"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
