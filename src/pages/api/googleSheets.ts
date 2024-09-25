@@ -7,8 +7,15 @@ dotenv.config();
 type RowData = { [key: string]: string };
 
 async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlayers: RowData[] }> {
+  const base64Credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
+  if (!base64Credentials) {
+    throw new Error('GOOGLE_APPLICATION_CREDENTIALS_BASE64 environment variable is not set');
+  }
+
+  const credentials = JSON.parse(Buffer.from(base64Credentials, 'base64').toString('utf8'));
+
   const auth = new google.auth.GoogleAuth({
-    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Use the environment variable
+    credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 
