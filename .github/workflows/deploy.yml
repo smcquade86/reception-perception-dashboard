@@ -25,9 +25,12 @@ jobs:
         run: |
           export NODE_ENV=production
           npm run build
+          npm run export
 
       - name: Deploy to GitHub Pages
-        run: npm run deploy
+        run: |
+          npm install -g gh-pages
+          gh-pages -d out
         env:
           NODE_ENV: production
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
