@@ -1,6 +1,6 @@
 {
   "name": "reception-perception-dashboard",
-  "homepage": "https://smcquade86.github.io/reception-perception-dashboard",
+  "homepage": "https://<username>.github.io/<repository-name>",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "lint": "npx next lint",
     "clean": "rm -rf node_modules .next dist",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
     "@apollo/client": "^3.11.8",
