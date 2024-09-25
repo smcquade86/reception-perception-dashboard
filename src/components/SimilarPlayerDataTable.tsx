@@ -37,8 +37,8 @@ const SimilarPlayerDataTable: React.FC<SimilarPlayerDataTableProps> = ({ data, s
         }
 
         const headers = Object.keys(filteredData[0]);
-        let routeHeaders = headers.filter(header => header.startsWith('Route %') && !header.includes('Rank'));
-        let successRateHeaders = headers.filter(header => header.startsWith('Success Rate') && !header.includes('Rank'));
+        const routeHeaders = headers.filter(header => header.startsWith('Route %') && !header.includes('Rank'));
+        const successRateHeaders = headers.filter(header => header.startsWith('Success Rate') && !header.includes('Rank'));
 
         moveTotalRoutesToEnd(routeHeaders);
         moveTotalRoutesToEnd(successRateHeaders);

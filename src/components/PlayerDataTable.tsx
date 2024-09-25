@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Typography, Box, useTheme } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Typography, Box } from '@mui/material';
 
 type RowData = { [key: string]: string };
 
@@ -10,8 +10,6 @@ interface PlayerDataTableProps {
 }
 
 const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer, selectedYear }) => {
-  const theme = useTheme();
-
   if (!selectedPlayer || !selectedYear) {
     return (
       <Box sx={{ textAlign: 'center', height: '100%' }}>
@@ -35,8 +33,8 @@ const PlayerDataTable: React.FC<PlayerDataTableProps> = ({ data, selectedPlayer,
   }
 
   const headers = Object.keys(filteredData[0]);
-  let routeHeaders = headers.filter(header => header.startsWith('Route %') && !header.includes('Rank'));
-  let successRateHeaders = headers.filter(header => header.startsWith('Success Rate') && !header.includes('Rank'));
+  const routeHeaders = headers.filter(header => header.startsWith('Route %') && !header.includes('Rank'));
+  const successRateHeaders = headers.filter(header => header.startsWith('Success Rate') && !header.includes('Rank'));
 
   const moveTotalRoutesToEnd = (headers: string[]) => {
     const totalRoutesIndex = headers.findIndex(header => header.includes('Total Routes'));

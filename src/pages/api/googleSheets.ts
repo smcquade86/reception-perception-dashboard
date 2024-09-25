@@ -1,27 +1,20 @@
 import { google } from 'googleapis';
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 type RowData = { [key: string]: string };
 
-async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlayers: RowData[] }> {
-  const auth = new google.auth.GoogleAuth({
-    keyFile: 'src/config/credentials.json',
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-  });
-
-  const sheets = google.sheets({ version: 'v4', auth });
-
+async function fetchGoogleSheetData() {
   try {
-    const spreadsheet = await sheets.spreadsheets.get({
-      spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
+    const auth = new google.auth.GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
 
-    console.log('Available sheets:', spreadsheet.data.sheets?.map(sheet => sheet.properties?.title));
+    const sheets = google.sheets({ version: 'v4', auth });
 
     // Fetch data from the player_data sheet
     const playersResponse = await sheets.spreadsheets.values.get({
       spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
-      range: 'player_data!A:BL',
+      range: 'player_data!A:Z',
     });
 
     const playersRows = playersResponse.data.values;
@@ -36,7 +29,7 @@ async function fetchGoogleSheetData(): Promise<{ players: RowData[], similarPlay
     // Fetch data from the player_data_colors sheet
     const colorsResponse = await sheets.spreadsheets.values.get({
       spreadsheetId: '1r4kOb2_pJnSQmV8qGzWD2_ofnXLk-V85TrYLQRcFe44',
-      range: 'player_data_colors!A:BL',
+      range: 'player_data_colors!A:Z',
     });
 
     const colorsRows = colorsResponse.data.values;
@@ -81,6 +74,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await fetchGoogleSheetData();
     res.status(200).json(data);
   } catch (error) {
+    console.error('Error in API handler:', error);
     res.status(500).json({ error: 'Failed to fetch Google Sheets data' });
   }
 }
