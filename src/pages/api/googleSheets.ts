@@ -104,7 +104,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const data = await fetchGoogleSheetData();
     res.status(200).json(data);
-  } catch {
+  } catch (error) {
+    console.error('Error in handler:', error);
     res.status(500).json({ error: 'Failed to fetch Google Sheets data' });
   }
 }
