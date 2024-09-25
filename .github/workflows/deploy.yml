@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # future-proof against Node 16 deprecation
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # future-proof against Node 16 deprecation
         with:
           node-version: '20'
 
@@ -22,13 +22,12 @@ jobs:
         run: node -v
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build project
         run: |
           export NODE_ENV=production
           npm run build 2>&1 | tee build-log.txt
-        continue-on-error: true
 
       - name: Capture build logs
         if: failure()
